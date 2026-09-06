@@ -15,6 +15,7 @@
   const tileCount = 20;
   const boardSize = tileSize * tileCount;
   const gameSpeed = 110;
+  const obstacleCount = 8;
 
   // Create the page elements needed by the game.
   const gameContainer = document.createElement("main");
@@ -59,20 +60,44 @@
   // The snake is stored as an array of positions, with the head at index 0.
   let snake;
   let food;
+  let obstacles;
   let direction;
   let nextDirection;
   let score;
   let gameOver;
   let gameTimer;
 
-  // Choose a random tile for the food that is not occupied by the snake.
+  function isOccupied(position) {
+    return (
+      snake.some((segment) => segment.x === position.x && segment.y === position.y) ||
+      obstacles.some((obstacle) => obstacle.x === position.x && obstacle.y === position.y)
+    );
+  }
+
+  // Choose random tiles for obstacles that do not block the starting snake.
+  function placeObstacles() {
+    obstacles = [];
+
+    while (obstacles.length < obstacleCount) {
+      const obstacle = {
+        x: Math.floor(Math.random() * tileCount),
+        y: Math.floor(Math.random() * tileCount),
+      };
+
+      if (!isOccupied(obstacle)) {
+        obstacles.push(obstacle);
+      }
+    }
+  }
+
+  // Choose a random tile for the food that is not occupied by the snake or obstacles.
   function placeFood() {
     do {
       food = {
         x: Math.floor(Math.random() * tileCount),
         y: Math.floor(Math.random() * tileCount),
       };
-    } while (snake.some((segment) => segment.x === food.x && segment.y === food.y));
+    } while (isOccupied(food));
   }
 
   // Reset every part of the game to its starting state.
@@ -82,6 +107,7 @@
       { x: 9, y: 10 },
       { x: 8, y: 10 },
     ];
+    placeObstacles();
     direction = { x: 1, y: 0 };
     nextDirection = { x: 1, y: 0 };
     score = 0;
@@ -143,8 +169,11 @@
     const hitSnake = snake.some(
       (segment) => segment.x === newHead.x && segment.y === newHead.y,
     );
+    const hitObstacle = obstacles.some(
+      (obstacle) => obstacle.x === newHead.x && obstacle.y === newHead.y,
+    );
 
-    if (hitWall || hitSnake) {
+    if (hitWall || hitSnake || hitObstacle) {
       endGame();
       return;
     }
@@ -168,6 +197,16 @@
   function drawGame() {
     context.fillStyle = "#1f2d3a";
     context.fillRect(0, 0, boardSize, boardSize);
+
+    obstacles.forEach((obstacle) => {
+      context.fillStyle = "#95a5a6";
+      context.fillRect(
+        obstacle.x * tileSize,
+        obstacle.y * tileSize,
+        tileSize - 1,
+        tileSize - 1,
+      );
+    });
 
     context.fillStyle = "#e74c3c";
     context.fillRect(food.x * tileSize, food.y * tileSize, tileSize, tileSize);
