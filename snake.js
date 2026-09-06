@@ -157,15 +157,10 @@
 
     direction = nextDirection;
     const newHead = {
-      x: snake[0].x + direction.x,
-      y: snake[0].y + direction.y,
+      x: (snake[0].x + direction.x + tileCount) % tileCount,
+      y: (snake[0].y + direction.y + tileCount) % tileCount,
     };
 
-    const hitWall =
-      newHead.x < 0 ||
-      newHead.x >= tileCount ||
-      newHead.y < 0 ||
-      newHead.y >= tileCount;
     const hitSnake = snake.some(
       (segment) => segment.x === newHead.x && segment.y === newHead.y,
     );
@@ -173,7 +168,7 @@
       (obstacle) => obstacle.x === newHead.x && obstacle.y === newHead.y,
     );
 
-    if (hitWall || hitSnake || hitObstacle) {
+    if (hitSnake || hitObstacle) {
       endGame();
       return;
     }
