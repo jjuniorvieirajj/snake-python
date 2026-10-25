@@ -1,4 +1,4 @@
-/*
+5/*
  * Classic Snake game
  *
  * Add this file to an HTML page with:
